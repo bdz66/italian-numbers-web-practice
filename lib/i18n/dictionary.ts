@@ -1,0 +1,166 @@
+export type UILanguage = 'en' | 'it';
+
+export const DEFAULT_UI_LANGUAGE: UILanguage = 'en';
+
+export const UI_LANGUAGE_LABELS: Record<UILanguage, string> = {
+  en: 'English',
+  it: 'Italiano',
+};
+
+type Dictionary = Record<string, string>;
+
+const en: Dictionary = {
+  'app.title': 'Italian Numbers Practice',
+  'app.tagline': 'Learn to hear and say Italian numbers, out loud.',
+
+  'setup.practiceMode': 'Practice mode',
+  'setup.practiceMode.listening': 'Listening',
+  'setup.practiceMode.listening.desc': 'The app speaks a number — you type it.',
+  'setup.practiceMode.speaking': 'Speaking',
+  'setup.practiceMode.speaking.desc': 'The app shows a number — you say it aloud.',
+  'setup.orderMode': 'Question order',
+  'setup.orderMode.sequential': 'Sequential',
+  'setup.orderMode.sequential.desc': 'Lowest to highest.',
+  'setup.orderMode.random': 'Random',
+  'setup.orderMode.random.desc': 'Shuffled within the range.',
+  'setup.range': 'Number range',
+  'setup.range.min': 'From',
+  'setup.range.max': 'To',
+  'setup.limitType': 'Session limit',
+  'setup.limitType.time': 'Time limit',
+  'setup.limitType.questions': 'Question count',
+  'setup.limit.minutes': 'Minutes',
+  'setup.limit.seconds': 'Seconds',
+  'setup.limit.questions': 'Number of questions',
+  'setup.uiLanguage': 'Interface language',
+  'setup.start': 'Start practice',
+  'setup.recentSessions': 'Recent sessions',
+  'setup.recentSessions.empty': 'No sessions yet — your history stays on this device only.',
+  'setup.recentSessions.clear': 'Clear history',
+  'setup.recentSessions.summary': '{correct}/{total} correct ({accuracy}%)',
+  'setup.privacyNote': 'Nothing is sent anywhere — all data stays in this browser.',
+
+  'practice.questionOf': 'Question {current} of {total}',
+  'practice.questionCount': 'Question {current}',
+  'practice.timeRemaining': 'Time left: {time}',
+  'practice.elapsed': 'Elapsed: {time}',
+  'practice.stop': 'Stop',
+  'practice.listening.prompt': 'Listen, then type the number you heard.',
+  'practice.listening.replay': 'Repeat',
+  'practice.listening.placeholder': 'Type the number…',
+  'practice.listening.submit': 'Submit',
+  'practice.speaking.prompt': 'Say this number in Italian.',
+  'practice.speaking.start': 'Tap to speak',
+  'practice.speaking.listening': 'Listening…',
+  'practice.speaking.heard': 'Heard: "{transcript}"',
+  'practice.speaking.retry': 'Try again',
+  'practice.speaking.notSupported': 'Speech recognition isn’t supported in this browser. Try Chrome, or switch to Listening mode.',
+  'practice.feedback.correct': 'Correct!',
+  'practice.feedback.incorrect': 'The answer was {answer}',
+  'practice.voiceWarning': 'No Italian voice found on this device — pronunciation may fall back to a default voice.',
+
+  'results.title': 'Session results',
+  'results.correctCount': 'Correct',
+  'results.incorrectCount': 'Incorrect',
+  'results.accuracy': 'Accuracy',
+  'results.totalTime': 'Time taken',
+  'results.avgTime': 'Avg. time / question',
+  'results.fastest': 'Fastest answer',
+  'results.slowest': 'Slowest answer',
+  'results.correctNumbers': 'Answered correctly',
+  'results.incorrectNumbers': 'Answered incorrectly',
+  'results.mostDifficult': 'Most difficult numbers',
+  'results.easiest': 'Easiest numbers',
+  'results.breakdown': 'Per-number breakdown',
+  'results.breakdown.number': 'Number',
+  'results.breakdown.attempts': 'Attempts',
+  'results.breakdown.correct': 'Correct',
+  'results.breakdown.avgTime': 'Avg. time',
+  'results.newSession': 'New session',
+  'results.noAnswers': 'No questions were answered in this session.',
+
+  'common.italianWord': 'Italian',
+};
+
+const it: Dictionary = {
+  'app.title': 'Pratica dei Numeri Italiani',
+  'app.tagline': 'Impara ad ascoltare e a dire i numeri italiani, ad alta voce.',
+
+  'setup.practiceMode': 'Modalità di pratica',
+  'setup.practiceMode.listening': 'Ascolto',
+  'setup.practiceMode.listening.desc': "L'app pronuncia un numero — tu lo scrivi.",
+  'setup.practiceMode.speaking': 'Parlato',
+  'setup.practiceMode.speaking.desc': "L'app mostra un numero — tu lo dici ad alta voce.",
+  'setup.orderMode': 'Ordine delle domande',
+  'setup.orderMode.sequential': 'In ordine',
+  'setup.orderMode.sequential.desc': 'Dal più basso al più alto.',
+  'setup.orderMode.random': 'Casuale',
+  'setup.orderMode.random.desc': "Mescolati all'interno dell'intervallo.",
+  'setup.range': 'Intervallo numerico',
+  'setup.range.min': 'Da',
+  'setup.range.max': 'A',
+  'setup.limitType': 'Limite sessione',
+  'setup.limitType.time': 'Limite di tempo',
+  'setup.limitType.questions': 'Numero di domande',
+  'setup.limit.minutes': 'Minuti',
+  'setup.limit.seconds': 'Secondi',
+  'setup.limit.questions': 'Numero di domande',
+  'setup.uiLanguage': "Lingua dell'interfaccia",
+  'setup.start': 'Inizia la pratica',
+  'setup.recentSessions': 'Sessioni recenti',
+  'setup.recentSessions.empty': 'Ancora nessuna sessione — la cronologia resta solo su questo dispositivo.',
+  'setup.recentSessions.clear': 'Cancella cronologia',
+  'setup.recentSessions.summary': '{correct}/{total} corrette ({accuracy}%)',
+  'setup.privacyNote': 'Nessun dato viene inviato altrove: tutto resta in questo browser.',
+
+  'practice.questionOf': 'Domanda {current} di {total}',
+  'practice.questionCount': 'Domanda {current}',
+  'practice.timeRemaining': 'Tempo rimasto: {time}',
+  'practice.elapsed': 'Tempo trascorso: {time}',
+  'practice.stop': 'Interrompi',
+  'practice.listening.prompt': 'Ascolta, poi scrivi il numero che hai sentito.',
+  'practice.listening.replay': 'Ripeti',
+  'practice.listening.placeholder': 'Scrivi il numero…',
+  'practice.listening.submit': 'Invia',
+  'practice.speaking.prompt': 'Di’ questo numero in italiano.',
+  'practice.speaking.start': 'Tocca per parlare',
+  'practice.speaking.listening': 'In ascolto…',
+  'practice.speaking.heard': 'Sentito: "{transcript}"',
+  'practice.speaking.retry': 'Riprova',
+  'practice.speaking.notSupported':
+    'Il riconoscimento vocale non è supportato in questo browser. Prova Chrome, oppure passa alla modalità Ascolto.',
+  'practice.feedback.correct': 'Corretto!',
+  'practice.feedback.incorrect': 'La risposta era {answer}',
+  'practice.voiceWarning':
+    'Nessuna voce italiana trovata su questo dispositivo — la pronuncia potrebbe usare una voce predefinita.',
+
+  'results.title': 'Risultati della sessione',
+  'results.correctCount': 'Corrette',
+  'results.incorrectCount': 'Errate',
+  'results.accuracy': 'Precisione',
+  'results.totalTime': 'Tempo impiegato',
+  'results.avgTime': 'Tempo medio / domanda',
+  'results.fastest': 'Risposta più veloce',
+  'results.slowest': 'Risposta più lenta',
+  'results.correctNumbers': 'Risposte corrette',
+  'results.incorrectNumbers': 'Risposte errate',
+  'results.mostDifficult': 'Numeri più difficili',
+  'results.easiest': 'Numeri più facili',
+  'results.breakdown': 'Dettaglio per numero',
+  'results.breakdown.number': 'Numero',
+  'results.breakdown.attempts': 'Tentativi',
+  'results.breakdown.correct': 'Corrette',
+  'results.breakdown.avgTime': 'Tempo medio',
+  'results.newSession': 'Nuova sessione',
+  'results.noAnswers': 'Nessuna domanda è stata risposta in questa sessione.',
+
+  'common.italianWord': 'Italiano',
+};
+
+export const dictionaries: Record<UILanguage, Dictionary> = { en, it };
+
+export function translate(lang: UILanguage, key: string, vars?: Record<string, string | number>): string {
+  const template = dictionaries[lang]?.[key] ?? dictionaries.en[key] ?? key;
+  if (!vars) return template;
+  return Object.entries(vars).reduce((acc, [k, v]) => acc.split(`{${k}}`).join(String(v)), template);
+}

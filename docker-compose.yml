@@ -1,0 +1,32 @@
+services:
+  # Production: `docker compose up` — builds the standalone Next.js server image.
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+
+  # Development: `docker compose --profile dev up dev` — hot-reloading `next dev`
+  # against the source tree, mirroring `npm run dev` but inside a container.
+  dev:
+    image: node:20-alpine
+    profiles: ['dev']
+    working_dir: /app
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - '3000:3000'
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    volumes:
+      - .:/app
+      - dev_node_modules:/app/node_modules
+      - dev_next_cache:/app/.next
+
+volumes:
+  dev_node_modules:
+  dev_next_cache:

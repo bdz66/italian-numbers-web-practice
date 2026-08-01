@@ -41,16 +41,35 @@ export function createRecognizer(options: RecognizerOptions): Recognizer | undef
   recognition.onerror = (event) => options.onError?.(event.error);
 
   recognition.onresult = (event) => {
-    const lastIndex = event.results.length - 1;
-    const result = event.results[lastIndex];
-    if (!result) return;
+    // A single "turn" can produce more than one result entry (e.g. a false-start filler
+    // word finalizes as its own entry before the actual answer starts accumulating in the
+    // next one). Scanning only the last entry can permanently miss an earlier one that
+    // already finalized, leaving the app "stuck" listening while later entries keep
+    // getting revised. Prefer the first final entry among the newly-changed ones; only
+    // fall back to the latest (still-interim) entry for live display.
+    let finalResult: SpeechRecognitionResult | undefined;
+    let latestResult: SpeechRecognitionResult | undefined;
 
-    const transcripts: string[] = [];
-    for (let i = 0; i < result.length; i++) {
-      transcripts.push(result[i]?.transcript ?? '');
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const result = event.results[i];
+      if (!result) continue;
+      latestResult = result;
+      if (result.isFinal && !finalResult) finalResult = result;
     }
 
-    options.onResult?.({ transcripts, isFinal: result.isFinal });
+    const reported = finalResult ?? latestResult;
+    if (!reported) return;
+
+    const transcripts: string[] = [];
+    for (let i = 0; i < reported.length; i++) {
+      transcripts.push(reported[i]?.transcript ?? '');
+    }
+
+    options.onResult?.({ transcripts, isFinal: reported.isFinal });
+
+    // Once we have a final phrase, stop listening rather than let the browser keep
+    // capturing (and potentially appending) further speech we don't need.
+    if (reported.isFinal) recognition.stop();
   };
 
   return {

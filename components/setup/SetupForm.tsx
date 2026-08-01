@@ -5,12 +5,14 @@ import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { useI18n } from '@/lib/i18n/I18nProvider';
 import { isSTTSupported } from '@/lib/speech/support';
-import { normalizeRange } from '@/lib/session/generateQuestions';
+import { normalizeRange, parseCustomNumberList } from '@/lib/session/generateQuestions';
 import type { SessionConfig } from '@/lib/session/types';
 import type { HistoryEntry } from '@/lib/storage/history';
+import { CustomNumberListInput } from './CustomNumberListInput';
 import { LanguageToggle } from './LanguageToggle';
 import { LimitSelector } from './LimitSelector';
 import { ModeSelector } from './ModeSelector';
+import { NumberSourceToggle } from './NumberSourceToggle';
 import { RangeSelector } from './RangeSelector';
 import { RecentSessions } from './RecentSessions';
 
@@ -33,7 +35,11 @@ export function SetupForm({ config, onConfigChange, onStart, history, onClearHis
     setSttSupported(isSTTSupported());
   }, []);
 
+  const isCustomSource = config.orderMode === 'random' && config.numberSource === 'custom';
+  const customNumbersEmpty = isCustomSource && parseCustomNumberList(config.customNumbersRaw).length === 0;
+
   const handleStart = () => {
+    if (customNumbersEmpty) return;
     const [rangeMin, rangeMax] = normalizeRange(config.rangeMin, config.rangeMax);
     onStart({ ...config, rangeMin, rangeMax });
   };
@@ -53,7 +59,14 @@ export function SetupForm({ config, onConfigChange, onStart, history, onClearHis
           practiceMode={config.practiceMode}
           onPracticeModeChange={(practiceMode) => onConfigChange({ ...config, practiceMode })}
           orderMode={config.orderMode}
-          onOrderModeChange={(orderMode) => onConfigChange({ ...config, orderMode })}
+          onOrderModeChange={(orderMode) =>
+            onConfigChange({
+              ...config,
+              orderMode,
+              // A custom number list is only offered for random order.
+              numberSource: orderMode === 'sequential' ? 'range' : config.numberSource,
+            })
+          }
         />
 
         {config.practiceMode === 'speaking' && !sttSupported ? (
@@ -62,11 +75,25 @@ export function SetupForm({ config, onConfigChange, onStart, history, onClearHis
           </p>
         ) : null}
 
-        <RangeSelector
-          min={config.rangeMin}
-          max={config.rangeMax}
-          onChange={(rangeMin, rangeMax) => onConfigChange({ ...config, rangeMin, rangeMax })}
-        />
+        {config.orderMode === 'random' ? (
+          <NumberSourceToggle
+            value={config.numberSource}
+            onChange={(numberSource) => onConfigChange({ ...config, numberSource })}
+          />
+        ) : null}
+
+        {isCustomSource ? (
+          <CustomNumberListInput
+            value={config.customNumbersRaw}
+            onChange={(customNumbersRaw) => onConfigChange({ ...config, customNumbersRaw })}
+          />
+        ) : (
+          <RangeSelector
+            min={config.rangeMin}
+            max={config.rangeMax}
+            onChange={(rangeMin, rangeMax) => onConfigChange({ ...config, rangeMin, rangeMax })}
+          />
+        )}
 
         {config.orderMode === 'sequential' ? (
           <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
@@ -85,7 +112,7 @@ export function SetupForm({ config, onConfigChange, onStart, history, onClearHis
           />
         )}
 
-        <Button size="lg" className="w-full" onClick={handleStart}>
+        <Button size="lg" className="w-full" onClick={handleStart} disabled={customNumbersEmpty}>
           {t('setup.start')}
         </Button>
         <p className="text-center text-xs text-slate-400 dark:text-slate-500">{t('setup.privacyNote')}</p>

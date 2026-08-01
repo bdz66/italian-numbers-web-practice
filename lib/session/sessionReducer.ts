@@ -1,4 +1,4 @@
-import type { QuestionResult, SessionConfig } from './types';
+import { DEFAULT_SESSION_CONFIG, type QuestionResult, type SessionConfig } from './types';
 
 export type SessionPhase = 'setup' | 'running' | 'finished';
 
@@ -14,16 +14,7 @@ export interface SessionState {
 
 export const initialSessionState: SessionState = {
   phase: 'setup',
-  config: {
-    practiceMode: 'listening',
-    orderMode: 'random',
-    rangeMin: 0,
-    rangeMax: 20,
-    limitType: 'questions',
-    limitSeconds: 120,
-    limitQuestions: 15,
-    numberLanguage: 'it',
-  },
+  config: DEFAULT_SESSION_CONFIG,
   currentNumber: 0,
   currentIndex: 0,
   answers: [],

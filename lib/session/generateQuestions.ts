@@ -23,38 +23,59 @@ export function normalizeRange(min: number, max: number): [number, number] {
   return [Math.round(lo), Math.round(hi)];
 }
 
+/** Splits a custom number list on spaces and/or commas, e.g. "1 23 543" or "1, 23, 543". */
+export function parseCustomNumberList(raw: string | undefined | null): number[] {
+  if (!raw) return [];
+  return raw
+    .split(/[\s,]+/)
+    .map((token) => token.trim())
+    .filter((token) => token.length > 0)
+    .map((token) => Number.parseInt(token, 10))
+    .filter((n) => Number.isFinite(n) && n >= 0);
+}
+
+/** Resolves the pool of numbers a session draws questions from, per `numberSource`. Duplicates are kept. */
+export function resolveNumberPool(config: SessionConfig): number[] {
+  if (config.numberSource === 'custom') {
+    const parsed = parseCustomNumberList(config.customNumbersRaw);
+    return parsed.length > 0 ? parsed : [0];
+  }
+  const [lo, hi] = normalizeRange(config.rangeMin, config.rangeMax);
+  const pool: number[] = [];
+  for (let n = lo; n <= hi; n++) pool.push(n);
+  return pool.length > 0 ? pool : [lo];
+}
+
 /**
- * Sequential practice means "go through the range once, in order" — a separate
+ * Sequential practice means "go through the pool once, in order" — a separate
  * time/question limit doesn't make sense there (a question-count limit larger than the
- * range would otherwise wrap around and repeat numbers, which isn't "sequential"
+ * pool would otherwise wrap around and repeat numbers, which isn't "sequential"
  * anymore). This resolves the config actually used to run a session: for sequential
- * order, the limit is pinned to exactly one pass over the (normalized) range; for
- * random order, the user's chosen limit is used as-is.
+ * order, the limit is pinned to exactly one pass over the (normalized) range — a custom
+ * number list is only offered for random order, so sequential always falls back to
+ * 'range' — while random order uses the user's chosen source and limit as-is.
  */
 export function resolveRunConfig(config: SessionConfig): SessionConfig {
   const [rangeMin, rangeMax] = normalizeRange(config.rangeMin, config.rangeMax);
+  const base: SessionConfig = { ...config, rangeMin, rangeMax };
   if (config.orderMode === 'sequential') {
     return {
-      ...config,
-      rangeMin,
-      rangeMax,
+      ...base,
+      numberSource: 'range',
       limitType: 'questions',
       limitQuestions: rangeMax - rangeMin + 1,
     };
   }
-  return { ...config, rangeMin, rangeMax };
+  return base;
 }
 
 /**
- * Lazily yields numbers from `[rangeMin, rangeMax]` forever: in order for 'sequential'
- * (cycling back to rangeMin), or reshuffled each lap for 'random'. Callers (the session
- * controller) decide when to stop pulling — this generator doesn't know about limits.
+ * Lazily yields numbers from `pool` forever: in order for 'sequential' (cycling back to
+ * the start), or reshuffled each lap for 'random'. Callers (the session controller)
+ * decide when to stop pulling — this generator doesn't know about limits.
  */
-export function createQuestionGenerator(rangeMin: number, rangeMax: number, orderMode: OrderMode): QuestionGenerator {
-  const [lo, hi] = normalizeRange(rangeMin, rangeMax);
-  const base: number[] = [];
-  for (let n = lo; n <= hi; n++) base.push(n);
-  if (base.length === 0) base.push(lo);
+export function createQuestionGenerator(pool: number[], orderMode: OrderMode): QuestionGenerator {
+  const base = pool.length > 0 ? pool : [0];
 
   let queue: number[] = orderMode === 'random' ? shuffle(base) : [...base];
   let cursor = 0;
@@ -77,7 +98,7 @@ export function createQuestionGenerator(rangeMin: number, rangeMax: number, orde
   return {
     next(): number {
       if (cursor >= queue.length) refill();
-      const value = queue[cursor] ?? lo;
+      const value = queue[cursor] ?? base[0] ?? 0;
       cursor += 1;
       lastValue = value;
       return value;

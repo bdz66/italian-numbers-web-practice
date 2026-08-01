@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import { useReducer } from 'react';
 import { Card } from '@/components/ui/Card';
 import { useTimer } from '@/hooks/useTimer';
-import { createQuestionGenerator } from '@/lib/session/generateQuestions';
+import { createQuestionGenerator, resolveNumberPool } from '@/lib/session/generateQuestions';
 import { initialSessionState, sessionReducer } from '@/lib/session/sessionReducer';
 import type { QuestionResult, SessionConfig, SessionResult } from '@/lib/session/types';
 import { ListeningQuestion } from './ListeningQuestion';
@@ -17,7 +17,7 @@ interface PracticeSessionProps {
 }
 
 export function PracticeSession({ config, onFinish }: PracticeSessionProps) {
-  const generatorRef = useRef(createQuestionGenerator(config.rangeMin, config.rangeMax, config.orderMode));
+  const generatorRef = useRef(createQuestionGenerator(resolveNumberPool(config), config.orderMode));
   const [state, dispatch] = useReducer(sessionReducer, initialSessionState);
   const finishedRef = useRef(false);
   const onFinishRef = useRef(onFinish);
@@ -27,7 +27,7 @@ export function PracticeSession({ config, onFinish }: PracticeSessionProps) {
 
   useEffect(() => {
     finishedRef.current = false;
-    generatorRef.current = createQuestionGenerator(config.rangeMin, config.rangeMax, config.orderMode);
+    generatorRef.current = createQuestionGenerator(resolveNumberPool(config), config.orderMode);
     const first = generatorRef.current.next();
     dispatch({ type: 'START', config, firstNumber: first, now: Date.now() });
   }, [config]);

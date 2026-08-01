@@ -23,15 +23,37 @@ export function normalizeRange(min: number, max: number): [number, number] {
   return [Math.round(lo), Math.round(hi)];
 }
 
-/** Splits a custom number list on spaces and/or commas, e.g. "1 23 543" or "1, 23, 543". */
+/** Widest span a single "a-b" token is allowed to expand to, so a typo can't hang the page. */
+const MAX_CUSTOM_RANGE_SPAN = 2000;
+
+/**
+ * Splits a custom number list on spaces and/or commas, e.g. "1 23 543" or "1, 23, 543".
+ * Tokens may also be a range like "10-15" (or "15-10"), which expands to every number
+ * in between, inclusive.
+ */
 export function parseCustomNumberList(raw: string | undefined | null): number[] {
   if (!raw) return [];
-  return raw
+
+  const numbers: number[] = [];
+  const tokens = raw
     .split(/[\s,]+/)
     .map((token) => token.trim())
-    .filter((token) => token.length > 0)
-    .map((token) => Number.parseInt(token, 10))
-    .filter((n) => Number.isFinite(n) && n >= 0);
+    .filter((token) => token.length > 0);
+
+  for (const token of tokens) {
+    const rangeMatch = /^(\d+)-(\d+)$/.exec(token);
+    if (rangeMatch) {
+      const [lo, hi] = normalizeRange(Number.parseInt(rangeMatch[1] ?? '', 10), Number.parseInt(rangeMatch[2] ?? '', 10));
+      if (hi - lo + 1 > MAX_CUSTOM_RANGE_SPAN) continue;
+      for (let n = lo; n <= hi; n++) numbers.push(n);
+      continue;
+    }
+
+    const n = Number.parseInt(token, 10);
+    if (Number.isFinite(n) && n >= 0) numbers.push(n);
+  }
+
+  return numbers;
 }
 
 /** Resolves the pool of numbers a session draws questions from, per `numberSource`. Duplicates are kept. */

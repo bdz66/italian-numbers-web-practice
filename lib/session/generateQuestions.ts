@@ -1,4 +1,4 @@
-import type { OrderMode } from './types';
+import type { OrderMode, SessionConfig } from './types';
 
 export interface QuestionGenerator {
   next: () => number;
@@ -21,6 +21,28 @@ export function normalizeRange(min: number, max: number): [number, number] {
   const lo = Math.min(min, max);
   const hi = Math.max(min, max);
   return [Math.round(lo), Math.round(hi)];
+}
+
+/**
+ * Sequential practice means "go through the range once, in order" — a separate
+ * time/question limit doesn't make sense there (a question-count limit larger than the
+ * range would otherwise wrap around and repeat numbers, which isn't "sequential"
+ * anymore). This resolves the config actually used to run a session: for sequential
+ * order, the limit is pinned to exactly one pass over the (normalized) range; for
+ * random order, the user's chosen limit is used as-is.
+ */
+export function resolveRunConfig(config: SessionConfig): SessionConfig {
+  const [rangeMin, rangeMax] = normalizeRange(config.rangeMin, config.rangeMax);
+  if (config.orderMode === 'sequential') {
+    return {
+      ...config,
+      rangeMin,
+      rangeMax,
+      limitType: 'questions',
+      limitQuestions: rangeMax - rangeMin + 1,
+    };
+  }
+  return { ...config, rangeMin, rangeMax };
 }
 
 /**

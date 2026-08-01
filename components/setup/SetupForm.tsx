@@ -68,14 +68,22 @@ export function SetupForm({ config, onConfigChange, onStart, history, onClearHis
           onChange={(rangeMin, rangeMax) => onConfigChange({ ...config, rangeMin, rangeMax })}
         />
 
-        <LimitSelector
-          limitType={config.limitType}
-          onLimitTypeChange={(limitType) => onConfigChange({ ...config, limitType })}
-          limitSeconds={config.limitSeconds}
-          onLimitSecondsChange={(limitSeconds) => onConfigChange({ ...config, limitSeconds })}
-          limitQuestions={config.limitQuestions}
-          onLimitQuestionsChange={(limitQuestions) => onConfigChange({ ...config, limitQuestions })}
-        />
+        {config.orderMode === 'sequential' ? (
+          <p className="rounded-lg bg-slate-50 px-3 py-2 text-xs text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+            {t('setup.sequentialInfo', {
+              count: Math.abs(config.rangeMax - config.rangeMin) + 1,
+            })}
+          </p>
+        ) : (
+          <LimitSelector
+            limitType={config.limitType}
+            onLimitTypeChange={(limitType) => onConfigChange({ ...config, limitType })}
+            limitSeconds={config.limitSeconds}
+            onLimitSecondsChange={(limitSeconds) => onConfigChange({ ...config, limitSeconds })}
+            limitQuestions={config.limitQuestions}
+            onLimitQuestionsChange={(limitQuestions) => onConfigChange({ ...config, limitQuestions })}
+          />
+        )}
 
         <Button size="lg" className="w-full" onClick={handleStart}>
           {t('setup.start')}

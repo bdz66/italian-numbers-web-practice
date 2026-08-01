@@ -5,6 +5,7 @@ import { PracticeSession } from '@/components/practice/PracticeSession';
 import { ResultsSummary } from '@/components/results/ResultsSummary';
 import { SetupForm } from '@/components/setup/SetupForm';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { resolveRunConfig } from '@/lib/session/generateQuestions';
 import { computeResults } from '@/lib/session/stats';
 import { DEFAULT_SESSION_CONFIG, type SessionConfig, type SessionResult } from '@/lib/session/types';
 import { appendHistoryEntry, clearHistory, loadHistory, type HistoryEntry } from '@/lib/storage/history';
@@ -15,6 +16,7 @@ type Screen = 'setup' | 'practice' | 'results';
 export default function Home() {
   const [config, setConfig] = useLocalStorage<SessionConfig>(STORAGE_KEYS.settings, DEFAULT_SESSION_CONFIG);
   const [screen, setScreen] = useState<Screen>('setup');
+  const [runConfig, setRunConfig] = useState<SessionConfig | null>(null);
   const [lastSession, setLastSession] = useState<SessionResult | null>(null);
   const [history, setHistory] = useState<HistoryEntry[]>([]);
 
@@ -49,6 +51,7 @@ export default function Home() {
           onConfigChange={setConfig}
           onStart={(nextConfig) => {
             setConfig(nextConfig);
+            setRunConfig(resolveRunConfig(nextConfig));
             setScreen('practice');
           }}
           history={history}
@@ -56,7 +59,7 @@ export default function Home() {
         />
       ) : null}
 
-      {screen === 'practice' ? <PracticeSession config={config} onFinish={handleFinish} /> : null}
+      {screen === 'practice' && runConfig ? <PracticeSession config={runConfig} onFinish={handleFinish} /> : null}
 
       {screen === 'results' && lastSession ? (
         <ResultsSummary session={lastSession} onNewSession={() => setScreen('setup')} />

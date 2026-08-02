@@ -1,65 +1,27 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { Button } from '@/components/ui/Button';
-import { useSpeechRecognition } from '@/hooks/useSpeechRecognition';
 import { useI18n } from '@/lib/i18n/I18nProvider';
-import { getNumberLanguage, type NumberLanguageCode } from '@/lib/numbers/registry';
-import type { QuestionResult } from '@/lib/session/types';
+import type { RecognitionStatus } from '@/hooks/useSpeechRecognition';
+
+interface SpeakingFeedback {
+  correct: boolean;
+  transcript: string;
+}
 
 interface SpeakingQuestionProps {
   number: number;
-  languageCode: NumberLanguageCode;
-  onComplete: (result: QuestionResult) => void;
+  status: RecognitionStatus;
+  interimTranscript: string;
+  feedback: SpeakingFeedback | null;
 }
 
-const FEEDBACK_DELAY_MS = 1300;
-
-export function SpeakingQuestion({ number, languageCode, onComplete }: SpeakingQuestionProps) {
+/**
+ * Purely presentational: the microphone is owned once, for the whole session, by
+ * PracticeSession (continuous listening — see SpeakingSessionGate). This just displays
+ * the current number plus whatever the shared recognizer is hearing right now.
+ */
+export function SpeakingQuestion({ number, status, interimTranscript, feedback }: SpeakingQuestionProps) {
   const { t } = useI18n();
-  const language = getNumberLanguage(languageCode);
-  const presentedAtRef = useRef(0);
-  const timeoutRef = useRef<number | undefined>(undefined);
-  const feedbackRef = useRef<{ correct: boolean; transcript: string } | null>(null);
-  const [feedback, setFeedback] = useState<{ correct: boolean; transcript: string } | null>(null);
-
-  const { supported, status, interimTranscript, start } = useSpeechRecognition({
-    lang: language.speechLang,
-    onFinalResult: (transcripts) => {
-      if (feedbackRef.current) return;
-      const match = language.compareSpokenToNumber(transcripts, number);
-      const timeMs = Date.now() - presentedAtRef.current;
-      const heard = transcripts[0] ?? '';
-      const next = { correct: match.isMatch, transcript: heard };
-      feedbackRef.current = next;
-      setFeedback(next);
-
-      timeoutRef.current = window.setTimeout(() => {
-        onComplete({
-          number,
-          userAnswer: heard,
-          correct: match.isMatch,
-          timeMs,
-          matchMethod: match.isMatch ? match.method : 'none',
-        });
-      }, FEEDBACK_DELAY_MS);
-    },
-  });
-
-  useEffect(() => {
-    presentedAtRef.current = Date.now();
-    return () => {
-      if (timeoutRef.current) window.clearTimeout(timeoutRef.current);
-    };
-  }, []);
-
-  if (!supported) {
-    return (
-      <p className="text-center text-sm text-amber-700 dark:text-amber-300">{t('practice.speaking.notSupported')}</p>
-    );
-  }
-
-  const showRetry = (status === 'no-speech' || status === 'error') && !feedback;
 
   return (
     <div className="space-y-5 text-center">
@@ -70,20 +32,13 @@ export function SpeakingQuestion({ number, languageCode, onComplete }: SpeakingQ
         {status === 'listening' ? (
           <span className="absolute inline-flex h-full w-full animate-pulse-ring rounded-full bg-brand-500" />
         ) : null}
-        <button
-          type="button"
-          onClick={start}
-          disabled={status === 'listening' || Boolean(feedback)}
-          className="relative flex h-20 w-20 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg transition-transform hover:scale-105 disabled:opacity-60"
-          aria-label={t('practice.speaking.start')}
-        >
+        <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg">
           <MicIcon />
-        </button>
+        </div>
       </div>
 
       <p className="min-h-[1.25rem] text-sm text-slate-500 dark:text-slate-400">
         {status === 'listening' ? interimTranscript || t('practice.speaking.listening') : null}
-        {status !== 'listening' && !feedback && !showRetry ? t('practice.speaking.start') : null}
       </p>
 
       {feedback ? (
@@ -101,12 +56,6 @@ export function SpeakingQuestion({ number, languageCode, onComplete }: SpeakingQ
             <p className="text-xs text-slate-400">{t('practice.speaking.heard', { transcript: feedback.transcript })}</p>
           ) : null}
         </div>
-      ) : null}
-
-      {showRetry ? (
-        <Button variant="secondary" onClick={start}>
-          {t('practice.speaking.retry')}
-        </Button>
       ) : null}
     </div>
   );

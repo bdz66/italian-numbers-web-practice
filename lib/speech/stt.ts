@@ -10,6 +10,8 @@ export interface RecognizerOptions {
   lang: string;
   interimResults?: boolean;
   maxAlternatives?: number;
+  /** Keep capturing across multiple phrases in one session instead of stopping after the first. */
+  continuous?: boolean;
   onResult?: (payload: RecognitionResultPayload) => void;
   onError?: (error: string) => void;
   onStart?: () => void;
@@ -34,7 +36,7 @@ export function createRecognizer(options: RecognizerOptions): Recognizer | undef
   recognition.lang = options.lang;
   recognition.interimResults = options.interimResults ?? true;
   recognition.maxAlternatives = options.maxAlternatives ?? 3;
-  recognition.continuous = false;
+  recognition.continuous = options.continuous ?? false;
 
   recognition.onstart = () => options.onStart?.();
   recognition.onend = () => options.onEnd?.();
@@ -67,9 +69,10 @@ export function createRecognizer(options: RecognizerOptions): Recognizer | undef
 
     options.onResult?.({ transcripts, isFinal: reported.isFinal });
 
-    // Once we have a final phrase, stop listening rather than let the browser keep
-    // capturing (and potentially appending) further speech we don't need.
-    if (reported.isFinal) recognition.stop();
+    // In one-shot mode, stop listening once we have a final phrase rather than let the
+    // browser keep capturing further speech we don't need. In continuous mode the caller
+    // wants the mic to stay open across many phrases, so leave the session running.
+    if (reported.isFinal && !recognition.continuous) recognition.stop();
   };
 
   return {

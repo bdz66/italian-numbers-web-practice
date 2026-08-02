@@ -21,7 +21,7 @@ const FEEDBACK_DELAY_MS = 1100;
 export function ListeningQuestion({ number, languageCode, onComplete }: ListeningQuestionProps) {
   const { t } = useI18n();
   const language = getNumberLanguage(languageCode);
-  const { supported, hasVoiceForLang, speakText } = useSpeechSynthesis(language.speechLang);
+  const { supported, isSpeaking, hasVoiceForLang, speakText } = useSpeechSynthesis(language.speechLang);
   const [showWritten, setShowWritten] = useLocalStorage(STORAGE_KEYS.showWrittenForm, false);
   const [inputValue, setInputValue] = useState('');
   const [feedback, setFeedback] = useState<{ correct: boolean } | null>(null);
@@ -70,15 +70,25 @@ export function ListeningQuestion({ number, languageCode, onComplete }: Listenin
         <p className="text-xs text-amber-600 dark:text-amber-400">{t('practice.voiceWarning')}</p>
       ) : null}
 
-      <button
-        type="button"
-        onClick={() => speakText(language.toWords(number))}
-        disabled={!supported}
-        className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg transition-transform hover:scale-105 disabled:opacity-40"
-        aria-label={t('practice.listening.replay')}
-      >
-        <SpeakerIcon />
-      </button>
+      <div className="mx-auto flex flex-col items-center gap-2">
+        <div className="relative flex h-20 w-20 items-center justify-center">
+          {isSpeaking ? (
+            <span className="absolute inline-flex h-full w-full animate-pulse-ring rounded-full bg-brand-500" />
+          ) : null}
+          <button
+            type="button"
+            onClick={() => speakText(language.toWords(number))}
+            disabled={!supported}
+            className="relative flex h-20 w-20 items-center justify-center rounded-full bg-brand-600 text-white shadow-lg transition-transform hover:scale-105 disabled:opacity-40"
+            aria-label={t('practice.listening.replay')}
+          >
+            <SpeakerIcon />
+          </button>
+        </div>
+        <span className="text-xs font-medium text-slate-500 dark:text-slate-400">
+          {t('practice.listening.replay')}
+        </span>
+      </div>
 
       <form onSubmit={handleSubmit} className="mx-auto flex max-w-xs flex-col items-center gap-3">
         <input

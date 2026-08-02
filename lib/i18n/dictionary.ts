@@ -59,6 +59,7 @@ const en: Dictionary = {
   'practice.listening.replay': 'Repeat',
   'practice.listening.placeholder': 'Type the number…',
   'practice.listening.submit': 'Submit',
+  'practice.listening.showWritten': 'Show written form',
   'practice.speaking.prompt': 'Say this number in Italian.',
   'practice.speaking.gate.prompt': "Tap once to turn on the mic — it'll stay on for the whole session, no need to tap again between numbers.",
   'practice.speaking.start': 'Tap to start',
@@ -143,6 +144,7 @@ const it: Dictionary = {
   'practice.listening.replay': 'Ripeti',
   'practice.listening.placeholder': 'Scrivi il numero…',
   'practice.listening.submit': 'Invia',
+  'practice.listening.showWritten': 'Mostra forma scritta',
   'practice.speaking.prompt': 'Di’ questo numero in italiano.',
   'practice.speaking.gate.prompt':
     'Tocca una volta per attivare il microfono: resterà attivo per tutta la sessione, non serve toccare di nuovo tra un numero e l’altro.',

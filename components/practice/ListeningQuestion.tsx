@@ -2,10 +2,13 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { Button } from '@/components/ui/Button';
+import { Switch } from '@/components/ui/Switch';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useSpeechSynthesis } from '@/hooks/useSpeechSynthesis';
 import { useI18n } from '@/lib/i18n/I18nProvider';
 import { getNumberLanguage, type NumberLanguageCode } from '@/lib/numbers/registry';
 import type { QuestionResult } from '@/lib/session/types';
+import { STORAGE_KEYS } from '@/lib/storage/localStorage';
 
 interface ListeningQuestionProps {
   number: number;
@@ -19,6 +22,7 @@ export function ListeningQuestion({ number, languageCode, onComplete }: Listenin
   const { t } = useI18n();
   const language = getNumberLanguage(languageCode);
   const { supported, hasVoiceForLang, speakText } = useSpeechSynthesis(language.speechLang);
+  const [showWritten, setShowWritten] = useLocalStorage(STORAGE_KEYS.showWrittenForm, false);
   const [inputValue, setInputValue] = useState('');
   const [feedback, setFeedback] = useState<{ correct: boolean } | null>(null);
   const presentedAtRef = useRef(0);
@@ -53,6 +57,15 @@ export function ListeningQuestion({ number, languageCode, onComplete }: Listenin
     <div className="space-y-4 text-center">
       <p className="text-sm text-slate-500 dark:text-slate-400">{t('practice.listening.prompt')}</p>
 
+      <div className="flex justify-center">
+        <Switch
+          id="show-written-form"
+          checked={showWritten}
+          onChange={setShowWritten}
+          label={t('practice.listening.showWritten')}
+        />
+      </div>
+
       {!hasVoiceForLang ? (
         <p className="text-xs text-amber-600 dark:text-amber-400">{t('practice.voiceWarning')}</p>
       ) : null}
@@ -80,6 +93,22 @@ export function ListeningQuestion({ number, languageCode, onComplete }: Listenin
           placeholder={t('practice.listening.placeholder')}
           className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-center text-2xl font-semibold text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
         />
+
+        <div
+          className={`grid w-full transition-all duration-300 ease-out ${
+            showWritten ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'
+          }`}
+        >
+          <div className="overflow-hidden">
+            <p
+              lang="it"
+              className="[overflow-wrap:anywhere] [hyphens:auto] rounded-xl bg-brand-50 px-4 py-2 text-xl font-semibold leading-snug text-brand-700 dark:bg-slate-800 dark:text-brand-300"
+            >
+              {language.toWords(number)}
+            </p>
+          </div>
+        </div>
+
         <Button type="submit" size="lg" className="w-full" disabled={Boolean(feedback) || inputValue.trim() === ''}>
           {t('practice.listening.submit')}
         </Button>

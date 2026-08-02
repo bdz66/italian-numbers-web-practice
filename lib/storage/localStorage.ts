@@ -2,6 +2,7 @@ export const STORAGE_KEYS = {
   settings: 'inp:settings:v1',
   uiLanguage: 'inp:ui-language:v1',
   history: 'inp:history:v1',
+  showWrittenForm: 'inp:show-written-form:v1',
 } as const;
 
 /** Imperative (non-hook) read, for use outside React state — e.g. appending history after a session ends. */

@@ -3,10 +3,13 @@
 import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
+import { Switch } from '@/components/ui/Switch';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useI18n } from '@/lib/i18n/I18nProvider';
 import { isSTTSupported } from '@/lib/speech/support';
 import { normalizeRange, parseCustomNumberList } from '@/lib/session/generateQuestions';
 import type { SessionConfig } from '@/lib/session/types';
+import { STORAGE_KEYS } from '@/lib/storage/localStorage';
 import type { HistoryEntry } from '@/lib/storage/history';
 import { CustomNumberListInput } from './CustomNumberListInput';
 import { LanguageToggle } from './LanguageToggle';
@@ -27,6 +30,7 @@ interface SetupFormProps {
 export function SetupForm({ config, onConfigChange, onStart, history, onClearHistory }: SetupFormProps) {
   const { t } = useI18n();
   const [sttSupported, setSttSupported] = useState(true);
+  const [showWritten, setShowWritten] = useLocalStorage(STORAGE_KEYS.showWrittenForm, false);
 
   useEffect(() => {
     // Feature-detects a browser API unavailable during SSR — can't be a lazy useState
@@ -73,6 +77,18 @@ export function SetupForm({ config, onConfigChange, onStart, history, onClearHis
           <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800 dark:bg-amber-950 dark:text-amber-200">
             {t('practice.speaking.notSupported')}
           </p>
+        ) : null}
+
+        {config.practiceMode === 'listening' ? (
+          <div className="flex items-center justify-between gap-4 rounded-lg bg-slate-50 px-3 py-2 dark:bg-slate-800">
+            <span className="text-sm text-slate-600 dark:text-slate-300">{t('practice.listening.showWritten')}</span>
+            <Switch
+              id="show-written-form-setup"
+              checked={showWritten}
+              onChange={setShowWritten}
+              ariaLabel={t('practice.listening.showWritten')}
+            />
+          </div>
         ) : null}
 
         {config.orderMode === 'random' ? (

@@ -105,7 +105,13 @@ export function createQuestionGenerator(pool: number[], orderMode: OrderMode): Q
 
   function refill(): void {
     const nextLap = orderMode === 'random' ? shuffle(base) : [...base];
-    if (orderMode === 'random' && nextLap.length > 1 && nextLap[0] === lastValue) {
+    // Swapping to dodge a repeat only adds variety when there's a genuine alternative
+    // first pick left after the swap. At exactly 2 items, "avoid this one value" pins
+    // the order down to a single possibility, so every future lap is forced into the
+    // same order forever — the sequence degenerates from random into a fixed
+    // back-and-forth. Above 2 items there's always another valid candidate, so the
+    // swap stays a light nudge instead of an outcome-determining constraint.
+    if (orderMode === 'random' && nextLap.length > 2 && nextLap[0] === lastValue) {
       const first = nextLap[0];
       const second = nextLap[1];
       if (first !== undefined && second !== undefined) {

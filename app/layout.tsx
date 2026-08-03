@@ -57,6 +57,9 @@ export const metadata: Metadata = {
     },
   },
   manifest: '/manifest.webmanifest',
+  verification: {
+    google: 'lrd-VjNuUPGxbs4TFWDPvY88LcJSy1aEmLGURX2fFUo',
+  },
 };
 
 export const viewport: Viewport = {

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { I18nProvider } from '@/lib/i18n/I18nProvider';
 import './globals.css';
 
@@ -21,6 +22,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body className="min-h-screen antialiased">
         <I18nProvider>{children}</I18nProvider>
+        <Script
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "efbc41fe1ec041c297e980dc77d84f3c"}'
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );

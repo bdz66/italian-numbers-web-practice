@@ -10,7 +10,7 @@ export const UI_LANGUAGE_LABELS: Record<UILanguage, string> = {
 type Dictionary = Record<string, string>;
 
 const en: Dictionary = {
-  'app.title': 'Italian Numbers Practice',
+  'app.title': 'Practice Italian Numbers',
   'app.tagline': 'Learn to hear and say Italian numbers, out loud.',
 
   'setup.practiceMode': 'Practice mode',
